@@ -22,7 +22,7 @@ public class Player {
     public Player() {
         width = Gdx.graphics.getWidth();
         height = Gdx.graphics.getWidth();
-        img = new Texture("missionbit.png");
+        img = new Texture("pygmy.png");
         sprite = new Sprite(img);
         velocity = new Vector2();
         position = new Vector2();
