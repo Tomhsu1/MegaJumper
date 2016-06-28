@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -31,6 +32,7 @@ public class MegaJumper extends ApplicationAdapter {
     Texture background;
     Music music;
     Sound bounce;
+    Sound dying;
 
 
     boolean debug = true;
@@ -48,6 +50,7 @@ public class MegaJumper extends ApplicationAdapter {
         music = Gdx.audio.newMusic(Gdx.files.internal("finalCountdown.mp3"));
         music.setLooping(true);
         music.play();
+        dying = Gdx.audio.newSound(Gdx.files.internal("dyingScream.mp3"));
         bounce = Gdx.audio.newSound(Gdx.files.internal("coinCollect.mp3"));
         batch = new SpriteBatch();
         platforms = new ArrayList<Platform>();
@@ -111,6 +114,15 @@ public class MegaJumper extends ApplicationAdapter {
         else if (state == GameState.IN_GAME) {
             jumper.getVelocity().add(gravity);
 
+            //make jumper move to other side of screen
+            if (jumper.getPosition().x > width) {
+                jumper.setPosition(0, jumper.getPosition().y);
+            }
+
+            //make jumper move to other side of screen
+            if (jumper.getPosition().x < 0) {
+                jumper.setPosition(width, jumper.getPosition().y);
+            }
             //changes direction right when you change tilt threshold, comment out for unresponsive movement
             if (Gdx.input.getAccelerometerX() > 0 ||Gdx.input.getAccelerometerX() < 0) jumper.getVelocity().x = 0;
 
@@ -133,6 +145,11 @@ public class MegaJumper extends ApplicationAdapter {
 
             if (jumper.getPosition().y < lowestPlatform) {
                 state = GameState.GAME_OVER;
+                music.stop();
+                dying.play();
+            } else {
+                music.play();
+                music.setLooping(true);
             }
 
             //collision code, kinda bad but it works lol
@@ -157,6 +174,7 @@ public class MegaJumper extends ApplicationAdapter {
         camera.update();
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
+        font.setColor(Color.BLUE);
         batch.draw(background, camera.position.x - width / 2, camera.position.y - height / 2, width, height);
         font.setColor(0, 0, 0, 1);
         if (state == GameState.IN_GAME) {
@@ -180,7 +198,7 @@ public class MegaJumper extends ApplicationAdapter {
             font.draw(batch, "Phone resolution: " + width + ", " + height, 20, height - 170);
         }
 
-        font.setScale(2);
+        font.setScale(1);
         if (state == GameState.START) {
             font.draw(batch, "Tap to start!", width / 2 - font.getBounds("Tap to start!").width / 2, height / 2);
         } else if (state == GameState.IN_GAME) {
